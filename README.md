@@ -1,7 +1,7 @@
 toptal
 ======
 
-tech2assignment
+Tech2assignment
 
 
 1. Install Visual Studio 2013
