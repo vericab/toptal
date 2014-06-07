@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Configuration;
+using TopTal.SeleniumPageAutomation.Configuration;
 
 namespace TopTal.SeleniumPageAutomation
 {
@@ -43,7 +44,25 @@ namespace TopTal.SeleniumPageAutomation
 
         public PageObject()
         {
-           /// initializing
+            ApplicationObjectConfiguration config = ApplicationObjectConfiguration.Instance;
+            PageObjectConfiguration currentPage = ApplicationObjectConfiguration.Instance.Pages.OfType<PageObjectConfiguration>().Where(p => p.Type == this.GetType()).FirstOrDefault();
+            Url = config.Url + (currentPage.Url != null ? currentPage.Url.OriginalString : "");
+            Driver = Activator.CreateInstance(config.BrowserType) as IWebDriver;
+            if (currentPage != null)
+            {
+                foreach (ElementConfiguration ec in currentPage.Elements)
+                {
+                    string value = ec.Value;
+                    FindBy findBy = ec.FindBy;
+                    Func<string, IWebElement> finder = (str) => FindElementBy(value, findBy);
+                    _cachedQueries.Add(ec.Name, finder);
+                }
+
+                foreach (var kp in currentPage.Values)
+                {
+                    currentPage.Type.GetProperty(kp.Key).SetValue(this, kp.Value, null);
+                }
+            }
         }
 
         private IWebElement FindElementBy(string query, FindBy findBy = FindBy.Name)
@@ -123,7 +142,7 @@ namespace TopTal.SeleniumPageAutomation
         public virtual string GetText(string name)
         {
             IWebElement elem = Find(name);
-            return elem.GetAttribute("value");
+            return elem.Text;
         }
 
     }

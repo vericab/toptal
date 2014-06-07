@@ -14,5 +14,10 @@ namespace TopTalWebTests
     public class RegistrationPage : PageObject <RegistrationPage>
     {
         /// additional, specific, functions for Registration Page
+        public string GetValue()
+        {
+            string resultText = GetText("Result");
+            return resultText;
+        }
     }
 }
